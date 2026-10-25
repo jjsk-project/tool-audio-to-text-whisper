@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+.process.lock
+input/*
+!input/.gitkeep
+output/*
+!output/.gitkeep
+
+.pycache/
