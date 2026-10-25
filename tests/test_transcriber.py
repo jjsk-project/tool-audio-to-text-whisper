@@ -25,7 +25,7 @@ class PipelineTests(unittest.TestCase):
         utils.ensure_folders()
 
     def audio(self):
-        path = config.INPUT_DIR / "sample.wav"
+        path = config.INPUT_DIR / "Standard recording 2.wav"
         path.write_bytes(b"test audio")
         return path
 
@@ -35,12 +35,19 @@ class PipelineTests(unittest.TestCase):
             destination, _ = t.transcribe_file(source, FakeModel())
         self.assertFalse(source.exists())
         self.assertEqual((destination / source.name).read_bytes(), b"test audio")
-        self.assertEqual((destination / "transcript.txt").read_text(), "Hello world.\n")
-        self.assertIn("00:00:00,000 --> 00:00:01,250", (destination / "subtitle.srt").read_text())
-        self.assertTrue((destination / "transcript.json").exists())
-        self.assertEqual(destination, config.OUTPUT_DIR / "sample")
-        metadata = json.loads((destination / "metadata.json").read_text())
+        self.assertEqual((destination / "Standard recording 2.txt").read_text(), "Hello world.\n")
+        self.assertIn("00:00:00,000 --> 00:00:01,250", (destination / "Standard recording 2.srt").read_text())
+        self.assertTrue((destination / "Standard recording 2.transcript.json").exists())
+        self.assertEqual(destination, config.OUTPUT_DIR / "Standard recording 2")
+        metadata = json.loads((destination / "Standard recording 2.metadata.json").read_text())
         self.assertEqual(metadata["status"], "completed")
+        self.assertEqual((destination / "Standard recording 2.md").read_text(),
+                         "# Standard recording 2\n\nHello world.\n")
+        self.assertIn("output/Standard recording 2/Standard recording 2.md", metadata["artifacts_created"])
+        self.assertEqual({p.name for p in destination.iterdir()}, {
+            "Standard recording 2.wav", "Standard recording 2.txt", "Standard recording 2.md",
+            "Standard recording 2.srt", "Standard recording 2.transcript.json", "Standard recording 2.metadata.json",
+        })
         self.assertEqual(metadata["model"], "small")
         self.assertGreaterEqual(metadata["runtime_seconds"], 0)
 
@@ -69,7 +76,7 @@ class PipelineTests(unittest.TestCase):
         with self.assertRaises(FileExistsError):
             t.transcribe_file(source, FakeModel())
         self.assertTrue(source.exists())
-        self.assertTrue((first / "sample.wav").exists())
+        self.assertTrue((first / "Standard recording 2.wav").exists())
 
     def test_only_direct_regular_audio_files(self):
         source = self.audio()
@@ -95,12 +102,12 @@ class PipelineTests(unittest.TestCase):
             fp16=False, verbose=False,
         )
         self.assertEqual(rows[0]["text"], "Hello world.")
-        self.assertIn('"engine": "openai-whisper"', (destination / "transcript.json").read_text())
+        self.assertIn('"engine": "openai-whisper"', (destination / "Standard recording 2.transcript.json").read_text())
 
     def test_subtitles_can_be_disabled(self):
         destination, _ = t.transcribe_file(self.audio(), FakeModel(), generate_subtitles=False)
-        self.assertFalse((destination / "subtitle.srt").exists())
-        metadata = json.loads((destination / "metadata.json").read_text())
+        self.assertFalse((destination / "Standard recording 2.srt").exists())
+        metadata = json.loads((destination / "Standard recording 2.metadata.json").read_text())
         self.assertFalse(any(p.endswith(".srt") for p in metadata["artifacts_created"]))
 
     def test_move_failure_leaves_audio_and_cleans_output(self):

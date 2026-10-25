@@ -41,15 +41,16 @@ For `input/meeting.wav`:
 ```text
 output/meeting/
 ├── meeting.wav       # Original audio moved after success
-├── transcript.txt
-├── subtitle.srt      # Omitted with --no-subtitles
-├── transcript.json   # Timed segments and detected language
-└── metadata.json     # Status, artifacts, model, timestamp, runtime
+├── meeting.txt
+├── meeting.md        # Markdown transcript
+├── meeting.srt      # Omitted with --no-subtitles
+├── meeting.transcript.json   # Timed segments and detected language
+└── meeting.metadata.json     # Status, artifacts, model, timestamp, runtime
 ```
 
 Existing output folders are never overwritten. If `output/meeting/` already exists, processing returns an error and leaves the new audio in `input/`. Archive/rename the old output or rename the new recording before retrying. Recordings with the same stem but different extensions also conflict.
 
-Handled processing failures preserve the audio in `input/` and clean up the newly created output folder. Other batch items continue. No detected speech produces empty transcripts and a warning, and moves the audio to output. Do not modify input files while processing. After a hard crash, inspect any partial output folder before retrying.
+Handled processing failures preserve the audio in `input/` and clean up the newly created output folder. Other batch items continue. No detected speech produces empty text/subtitle files, a Markdown title, and a warning, and moves the audio to output. Do not modify input files while processing. After a hard crash, inspect any partial output folder before retrying.
 
 ## Pydantic tool interface
 
@@ -105,4 +106,4 @@ tests/
 
 Tests cover schema validation, path restrictions, tool errors, metadata, optional subtitles, output collisions, successful audio moves, rollback, and batch handling with fake models. They do not measure transcription accuracy.
 
-Migration: previous generated folders are untouched. New outputs use a fixed stem folder instead of a random suffix, `subtitle.srt` instead of `transcript.srt`, and include `metadata.json`.
+Migration: previous generated folders are untouched. New outputs use the original recording’s stem for every filename, including `<stem>.md`, `<stem>.txt`, `<stem>.srt`, `<stem>.transcript.json`, and `<stem>.metadata.json`. Markdown includes a title and transcript paragraphs.

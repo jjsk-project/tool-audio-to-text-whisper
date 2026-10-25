@@ -36,9 +36,9 @@ The arguments object is the complete configuration for `--tool-call`; other tran
 - Batch mode scans only the top level of `input/` and invokes the same validated tool once per file. The last model is cached for reuse across calls in the process.
 - Each call obtains the project’s nonblocking process lock. Concurrent calls fail with a JSON error and can be retried later.
 - Output is exactly `output/<audio_stem>/`. Existing folders, files, or symlinks at that location are never overwritten. Same-stem recordings (including differing extensions) conflict; rename the new input or archive the old output first.
-- The pipeline writes `transcript.txt`, `transcript.json`, optional `subtitle.srt`, and `metadata.json`, then moves the original audio last.
-- `metadata.json` records completed status, source, output directory, generated artifact paths, moved-audio path, engine, model, detected language, UTC timestamp, segment count, source bytes, warnings, and runtime seconds. Runtime covers inference and artifact creation, excluding model loading and the final move. The artifact list excludes the metadata file itself and original audio, which have separate roles.
-- Empty speech is a success with warnings and empty transcript files. Original audio is still moved.
+- The pipeline writes `<stem>.txt`, `<stem>.md`, `<stem>.transcript.json`, optional `<stem>.srt`, and `<stem>.metadata.json`, then moves the original audio last.
+- `<stem>.metadata.json` records completed status, source, output directory, generated artifact paths, moved-audio path, engine, model, detected language, UTC timestamp, segment count, source bytes, warnings, and runtime seconds. Runtime covers inference and artifact creation, excluding model loading and the final move. The artifact list excludes the metadata file itself and original audio, which have separate roles.
+- Empty speech is a success with warnings, empty text/subtitle files, and a Markdown title. Original audio is still moved.
 - Handled failures and interruptions clean the newly created output and preserve input. Abrupt process termination or power loss can leave a partial folder; inspect and archive it before retrying. Success is authoritative only when the call returns success; metadata is written immediately before the final move.
 - Original audio is never intentionally deleted. Historical output folders are not migrated.
 

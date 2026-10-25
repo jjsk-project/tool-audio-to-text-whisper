@@ -11,7 +11,7 @@ class FileProcessingInput(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
 
     file_name: str = Field(description="Audio filename directly inside input/.", examples=["meeting.wav"])
-    generate_subtitles: bool = Field(default=True, description="Generate subtitle.srt alongside the transcript.")
+    generate_subtitles: bool = Field(default=True, description="Generate <recording_stem>.srt alongside the text and Markdown transcripts.")
     model: Literal["tiny", "base", "small", "medium", "large-v3", "turbo"] = Field(default=DEFAULT_MODEL)
     language: Optional[str] = Field(default=None, description="Language code such as en or ko; null detects automatically.")
 

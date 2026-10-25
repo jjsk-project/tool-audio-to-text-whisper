@@ -45,7 +45,7 @@ class ToolTests(unittest.TestCase):
             result = json.loads(tools.file_processor_tool.run(file_name=source.name))
             self.assertEqual(result["status"], "success")
             self.assertFalse(source.exists())
-            self.assertIn("output/example/metadata.json", result["artifacts"])
+            self.assertIn("output/example/example.metadata.json", result["artifacts"])
             self.assertTrue(result["warnings"])
             source.write_bytes(b"second audio")
             duplicate = json.loads(tools.file_processor_tool.run(file_name=source.name))

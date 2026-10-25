@@ -36,15 +36,19 @@ def transcribe_file(source, model, language=None, generate_subtitles=True, model
                                   fp16=config.FP16, verbose=False)
         rows = [{"start": float(s["start"]), "end": float(s["end"]), "text": s["text"].strip()}
                 for s in result["segments"]]
-        (destination / "transcript.txt").write_text(
+        (destination / f"{source.stem}.txt").write_text(
             "\n".join(row["text"] for row in rows) + ("\n" if rows else ""), encoding="utf-8")
-        names = ["transcript.txt", "transcript.json"]
+        (destination / f"{source.stem}.md").write_text(
+            f"# {source.stem}\n\n" + "\n\n".join(row["text"] for row in rows) + ("\n" if rows else ""),
+            encoding="utf-8",
+        )
+        names = [f"{source.stem}.txt", f"{source.stem}.md", f"{source.stem}.transcript.json"]
         if generate_subtitles:
-            (destination / "subtitle.srt").write_text("\n\n".join(
+            (destination / f"{source.stem}.srt").write_text("\n\n".join(
                 f"{i}\n{timestamp(row['start'])} --> {timestamp(row['end'])}\n{row['text']}"
                 for i, row in enumerate(rows, 1)) + ("\n" if rows else ""), encoding="utf-8")
-            names.append("subtitle.srt")
-        (destination / "transcript.json").write_text(json.dumps({
+            names.append(f"{source.stem}.srt")
+        (destination / f"{source.stem}.transcript.json").write_text(json.dumps({
             "source": source.name, "language": result["language"],
             "engine": "openai-whisper", "segments": rows,
         }, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -59,7 +63,7 @@ def transcribe_file(source, model, language=None, generate_subtitles=True, model
             "segment_count": len(rows), "source_bytes": source.stat().st_size,
             "warnings": [] if rows else ["No speech detected."],
         }
-        (destination / "metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
+        (destination / f"{source.stem}.metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
         # Move last: all artifacts must exist before the original leaves input.
         source.rename(destination / source.name)
     except BaseException:
